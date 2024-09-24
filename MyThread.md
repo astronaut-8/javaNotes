@@ -10,8 +10,6 @@
 
 ·多线程是指从软硬件上实现的多条执行流程的技术(多条线程由cup负责调度执行)
 
-
-
 # 2.创建和使用
 
 ## 2.1继承Tread类
@@ -22,7 +20,6 @@
  */
 public class MyThread extends Thread{
     //2.重写Tread的run方法
-
 
     @Override
     public void run() {
@@ -135,8 +132,6 @@ public class Demo3 {
 ## 2.3实现Callable接口
 
 **前两种方式实现的多线程由一个共同问题：假如线程执行完毕后有一些数据需要返回，他们重写的run方法均不能直接返回结果**
-
-​	
 
 ```java
 public class MyCallable implements Callable<String> {//泛型内为返回值类型
