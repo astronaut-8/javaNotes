@@ -88,21 +88,50 @@ public static void main(String[] args) {
 - 中间方法，返回新的steam流，**原来的steam流只能使用一次**，使用链式编程
 - 修改steam流中的数据，不会影响原来，集合或者数组中的数据
 
-过滤 - 为函数式接口
+**过滤 - 为函数式接口**
 
 <img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-13%2017.22.42.png" alt="截屏2024-09-13 17.22.42" style="zoom:50%;" />
 
+- **distinct底层使用的是hashSet**
 
+- **concat合并a和b，如果a，b类型不同，那么合并后的结果为ab的共同父类，无法调用子类方法**
+
+![截屏2024-09-24 20.24.01](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.24.01.png)
+
+- **map**
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.26.19.png" alt="截屏2024-09-24 20.26.19" style="zoom:33%;" />
+
+![截屏2024-09-24 20.27.34](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.27.34.png)
 
 # Stream流终结方法
 
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.28.21.png" alt="截屏2024-09-24 20.28.21" style="zoom:50%;" />
 
+- **forEach便利** 
 
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.30.59.png" alt="截屏2024-09-24 20.30.59" style="zoom:33%;" />
 
+- **toArray**
 
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.32.09.png" alt="截屏2024-09-24 20.32.09" style="zoom:33%;" />
 
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.36.17.png" alt="截屏2024-09-24 20.36.17" style="zoom:50%;" />
 
 
 
 # collect收集方法
 
+**收集流中的数据，放到list map 和 Set中去**
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.43.38.png" alt="截屏2024-09-24 20.43.38" style="zoom: 50%;" />
+
+**map**
+
+收集到map中，键不能重复，不然就会报错
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.50.39.png" alt="截屏2024-09-24 20.50.39" style="zoom: 33%;" />
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.45.16.png" alt="截屏2024-09-24 20.45.16" style="zoom:50%;" />
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.47.53.png" alt="截屏2024-09-24 20.47.53" style="zoom:33%;" />
