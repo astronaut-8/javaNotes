@@ -122,6 +122,14 @@ public static void main(String[] args) {
 
 # collect收集方法
 
+整形这样的基本数据类型在做收集之类的操作的时候，应该封装成为包装类
+
+```java
+// 使用Stream将数组转换为Set       
+Set<Integer> set = Arrays.stream(array)                                 
+													.boxed() // 将 int 转换为 Integer                                 																						.collect(Collectors.toSet());
+```
+
 **收集流中的数据，放到list map 和 Set中去**
 
 <img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-09-24%2020.43.38.png" alt="截屏2024-09-24 20.43.38" style="zoom: 50%;" />
