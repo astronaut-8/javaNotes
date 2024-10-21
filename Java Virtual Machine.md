@@ -489,7 +489,7 @@ arthas中
 
 **ClassLoader**
 
-
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2015.29.18.png" alt="截屏2024-10-21 15.29.18" style="zoom:50%;" />
 
 
 
@@ -1131,6 +1131,12 @@ public class SoftReferenceExample {
 
 
 ##### 虚引用和终结器引用
+
+虚引用 对象被回收 MyPhantomReference 加入到que队列中
+
+MyPhantomReference 继承自 PhantomReference 实现其中的clean方法，实现清理
+
+![截屏2024-10-21 16.29.04](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.29.04.png)
 
 ![截屏2024-10-08 16.22.27](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-08%2016.22.27.png)
 
@@ -3435,3 +3441,85 @@ mark1 - 上一轮的垃圾回收标记阶段 交替使用
 ![截屏2024-10-17 19.52.09](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-17%2019.52.09.png)
 
 ![截屏2024-10-17 19.52.24](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-17%2019.52.24.png)
+
+## 面试小记
+
+### tomcat的自定义类加载器
+
+![截屏2024-10-21 16.13.02](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.13.02.png)
+
+**common类加载器主要加载tomcat自身使用以及应用使用的jar包，默认配置在catalina.properties文件中。**
+
+**common.loader="${catalina.base)/lib", "${catalina.base}/lib/*jar"**
+
+![截屏2024-10-21 15.41.39](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2015.41.39.png)
+
+
+
+
+
+**catalina类加载器主要加载tomcat自身使用的jar包，不让应用使用，默认配置在catalina.properties文件中。**
+
+***server.loader=***
+
+**默认配置为空，为空时catalina加载器和common加载器是同一个。**	
+
+**自己配置的tomcat插件可以使用这个类加载器**
+
+![截屏2024-10-21 15.50.57](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2015.50.57.png)
+
+
+
+**shared类加载器主要加载应用使用的jar包，不让tomcat使用，默认配置在catalina.properties文件中。**
+
+**shared.loader=**
+
+**默认配置为空，为空时shared加载器和common加载器是同-一个。**
+
+![截屏2024-10-21 15.59.18](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2015.59.18.png)
+
+
+
+**ParallelwebappClassLoader类加载器可以多线程并行加载应用中使用到的类，每个应用都拥有一个自己的该类加载器。**
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.02.57.png" alt="截屏2024-10-21 16.02.57" style="zoom:50%;" />
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.04.55.png" alt="截屏2024-10-21 16.04.55" style="zoom:50%;" />
+
+是否开启代理，默认false 打破双亲委派机制
+
+![截屏2024-10-21 16.06.54](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.06.54.png)
+
+![截屏2024-10-21 16.08.43](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.08.43.png)
+
+
+
+
+
+**JasperLoader类加载器负责加载JSP文件编译出来的class字节码文件，为了实现热部署（不重启让修改的jsp生效），每一个jsp文件都由一个独立的JasperLoader负责加载**
+
+每当修改jsp文件，类加载器就会重新创建一次，用于加载新的jsp文件
+
+
+
+
+
+### ThreadLocal为什么要使用弱引用
+
+![截屏2024-10-21 16.34.45](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.34.45.png)
+
+![截屏2024-10-21 16.35.45](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.35.45.png)
+
+<img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.36.59.png" alt="截屏2024-10-21 16.36.59" style="zoom:50%;" />
+
+尽管`ThreadLocalMap`是线程私有的，但多个`ThreadLocal`实例可能会在同一个线程中存在。如果一个线程中使用了多个不同的`ThreadLocal`实例，每个实例都需要在`ThreadLocalMap`中占据一个槽位来存储它的值
+
+![截屏2024-10-21 16.38.10](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.38.10.png)
+
+![截屏2024-10-21 16.39.40](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.39.40.png)
+
+执行别的threadLocal 的 set get remove 方法时，会触发条件删除 没有关联threadlocal 的Entry对象
+
+![截屏2024-10-21 16.40.44](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.40.44.png)
+
+![ ](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.41.58.png)
