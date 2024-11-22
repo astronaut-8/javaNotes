@@ -1067,6 +1067,12 @@ Cache<Object, Object> buzld = Caffeine.newBuilder().softValues().build();
 
 
 
+所以对于 ReferenceQueue<T>：
+
+​	1.	其中的泛型 T 是与特定引用类型所关联的对象类型，如 byte[]。
+
+​	2.	这确保了从 ReferenceQueue 中获取的对象类型是 Reference<T>，不需要显式类型转换。
+
 <img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-08%2015.19.37.png" alt="截屏2024-10-08 15.19.37" style="zoom:50%;" />
 
 清理SoftReference 的实例代码
@@ -1132,9 +1138,62 @@ public class SoftReferenceExample {
 
 ##### 虚引用和终结器引用
 
-虚引用 对象被回收 MyPhantomReference 加入到que队列中
+- 当对象被虚引用，这个对象就无法被访问到了(PhantomReference的get方法返回null)
+- 虚引用最大的区别就是Reference关联对象被回收前，Reference就会被加入到ReferenceQueue
+- 新建线程取到ReferenceQueue中的对象，在这里去get执行清理方法
 
-MyPhantomReference 继承自 PhantomReference 实现其中的clean方法，实现清理
+```Java
+import java.lang.ref.PhantomReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+
+public class PhantomReferenceWithCleanupExample {
+    
+    public static void main(String[] args) throws InterruptedException {
+        ReferenceQueue<Resource> referenceQueue = new ReferenceQueue<>();
+
+        // 创建一个自定义的资源对象，并创建其虚引用
+        Resource resource = new Resource();
+        PhantomReference<Resource> phantomRef = new PhantomReference<>(resource, referenceQueue);
+
+        // 启动一个监控线程，用于在对象被回收之前执行清理操作
+        Thread cleanerThread = new Thread(() -> {
+            try {
+                // 阻塞等待引用被加入队列
+                Reference<? extends Resource> ref = referenceQueue.remove();
+                
+                if (ref != null) {
+                    // 在此处执行清理操作
+                    System.out.println("Resource is about to be garbage collected, releasing external resources.");
+                    ((Resource) ref.get()).cleanUp(); // 释放资源
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        cleanerThread.setDaemon(true);
+        cleanerThread.start();
+
+        // 清除强引用，触发垃圾回收条件
+        resource = null;
+
+        // 手动请求垃圾回收
+        System.out.println("Requesting garbage collection...");
+        System.gc();
+
+        // 让主线程等待一会，确保垃圾回收完成
+        Thread.sleep(1000);
+    }
+}
+
+// 定义一个示例资源类，包含需要释放的外部资源
+class Resource {
+    
+    public void cleanUp() {
+        System.out.println("Cleaning up external resources.");
+    }
+}
+```
 
 ![截屏2024-10-21 16.29.04](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-21%2016.29.04.png)
 
@@ -1151,6 +1210,8 @@ ByteBuffer向操作系统申请直接内存，当将变量赋值为null，只是
 ![截屏2024-10-08 16.27.36](https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-08%2016.27.36.png)
 
 <img src="https://typora---------image.oss-cn-beijing.aliyuncs.com/%E6%88%AA%E5%B1%8F2024-10-08%2016.28.27.png" alt="截屏2024-10-08 16.28.27" style="zoom:50%;" />
+
+
 
 终结器引用的finalize方法调用不确定，由垃圾回收器决定，基本不使用
 

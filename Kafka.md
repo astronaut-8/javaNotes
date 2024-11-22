@@ -532,7 +532,7 @@ int partition = partition(record, serializedKey, serialized Value, cluster);
 
   
 
-**5 -** 消息类加器
+**5 -** 消息累加器
 
 **选择分区以后并没有直接发送消息，而是把消息放入了消息累加器**
 
@@ -879,7 +879,7 @@ Follower 副本的 HW 是从 Leader 的 HW 同步过来的，而不是独立计�
 
 ​	•	**消息截断问题**：在 Follower 副本追随 Leader 时，如果 Leader 发生故障或更换，可能会出现不一致的情况。比如，Leader 副本在处理一条消息后成功更新了自己的 HW，但在这条消息被同步到所有 Follower 之前，Leader 就发生了故障。这时候，新的 Leader 可能会重用旧的消息记录，而不是已经被确认的最新消息，从而造成消息的截断。
 
-​	•	**HW 不一致**：由于没有 Leader Epoch 的机制，Follower 副本无法准确知道自己应该追随哪个 Leader 的数据。在某些情况下，Follower 可能会从一个不同的、过时的 Leader 副本获取数据，这会导致 Follower 副本的数据与新的 Leader 副本的数据不一致。
+​	•	**HW 不一致**：由于没有 Leader Epoch 的机制，Follower 副本**无法准确知道自己应该追随哪个 Leader 的数据**。在某些情况下，Follower 可能会从一个不同的、过时的 Leader 副本获取数据，这会导致 Follower 副本的数据与新的 Leader 副本的数据不一致。
 
 
 
@@ -976,7 +976,7 @@ Follower 副本的 HW 是从 Leader 的 HW 同步过来的，而不是独立计�
 
 **3）sticky（粘滞）**
 
-粘滞的分配策略较为复杂，它的核心思想是在分区**重新分配时保证最小的移动**（类似Redis的一致性hash思想，实现方式不同）。
+粘滞的分配策略较为复杂，它的核心思想是在分区**重新分配时保证最小的移动**（类似Redis的**一致性hash思想**，实现方式不同）。
 
 第一次分配**类似轮询**，结果如下：
   C1：P0 P3 P6

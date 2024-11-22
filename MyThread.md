@@ -336,7 +336,7 @@ public synchronized void withdraw2(double money){
 
 更灵活，更方便，更强大
 
-Lock是一个接口，采用其实现类 reentranLock来构建Lock对象
+Lock是一个接口，采用其实现类 **reentranLock**来构建Lock对象
 
 
 
@@ -720,9 +720,10 @@ public class WorkDemo {
        xm.start();
 
 
-       xh.join();
-       xm.join();//确保两个线程都执行完，一个对象join另外一个对象不会停止，这里只是主线程停止
+       //xh.join();
+       //xm.join();//确保两个线程都执行完，一个对象join另外一个对象不会停止，这里只是主线程停止
 
+      Thread.sleep(1000);
         System.out.println(xh.getCount());
         System.out.println(xm.getCount());
 
