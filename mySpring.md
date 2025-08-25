@@ -4,7 +4,7 @@
 
 ## IoC思想
 
-**inversion of Control 控制反转，强调的是原来在程序中创建bean的权利转给第三方**
+**inversion of Control 控制反转，强调的是原来在程序中创建bean的权利转给第三方** 
 
 ## DI思想
 
@@ -1615,6 +1615,7 @@ public class MyAdvice {
 ### 切点表达式抽取
 
 ```java
+@Aspect
 public class MyAdvice {
 
     @Pointcut("execution(void com.itheima.service.impl.UserServiceImpl.show1())")

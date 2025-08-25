@@ -227,7 +227,7 @@ sql可以ACID  nosql - base
 </dependency>
 ```
 
-```
+```xml
 <dependency>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-data-redis</artifactId>
@@ -2012,7 +2012,7 @@ public Result queryBlogOfFollow(Long max, Integer offset) {
         ids.add(Long.valueOf(idStr));
         long time = tuple.getScore().longValue();
         if (minTime == time){
-            os += 1;
+            os += 1;f
         }else {
             os = 1;
             minTime = time;

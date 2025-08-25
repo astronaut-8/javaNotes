@@ -663,6 +663,133 @@ public class GenericInterceptor implements MethodInterceptor {
 
 **代理后的对象还要参与BeanPostProcessor的后置方法调用**
 
+
+
+# **aop部分复习**
+
+jdk动态代理方式 定义一个InvocationHandler 来描述增强方式 需要先实例化对象 因为在InvocationHandler中需要调用原方法
+
+根据接口生成一个代理类，执行函数的时候重定向到invoke的逻辑
+
+
+
+```java
+interface Subject {
+    void request();
+}
+//----------------------
+class RealSubject implements Subject {
+    @Override
+    public void request() {
+        System.out.println("origin target object");
+    }
+}
+//----------------------
+class ProxyHandler implements InvocationHandler {
+    private final Object target;
+    public ProxyHandler(Object target) {
+        this.target = target;
+    }
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        System.out.println("Before method call.");
+        Object result = method.invoke(target, args);
+        System.out.println("After method call.");
+        return result;
+    }
+}
+//----------------------
+public class JdkDynamicProxyExample {
+    public static void main(String[] args) {
+        RealSubject realSubject = new RealSubject();
+        ProxyHandler proxyHandler = new ProxyHandler(realSubject);
+        Subject proxySubject = (Subject) Proxy.newProxyInstance(
+                Subject.class.getClassLoader(),
+                new Class<?>[]{Subject.class},
+                proxyHandler
+        );
+        proxySubject.request();
+    }
+}
+```
+
+CGLIB 生成新类和对象的过程涉及到**字节码层面的操作**，它会生成一个继承自目标类的新类，在新类重写的方法中插入对 `MethodInterceptor` 的 `intercept` 方法的**调用**，而不是简单地把 `intercept` 方法内容直接作为新类的函数
+
+```java
+public class TargetClass {
+    public void doSomething() {
+        System.out.println("TargetClass is doing something.");
+    }
+}
+// 实现 MethodInterceptor 接口
+public class ProxyInterceptor implements MethodInterceptor {
+    @Override
+    public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
+        System.out.println("Before method call.");
+
+        Object result = proxy.invokeSuper(obj, args);
+
+        System.out.println("After method call.");
+
+        return result;
+    }
+}
+public class CglibProxyExample {
+    public static void main(String[] args) {
+        // 创建 Enhancer 对象，用于生成代理类
+        Enhancer enhancer = new Enhancer();
+        // 设置要代理的目标类
+        enhancer.setSuperclass(TargetClass.class);
+        // 设置回调对象，即 MethodInterceptor 的实现类
+        enhancer.setCallback(new ProxyInterceptor());
+
+        // 创建代理对象
+        TargetClass proxy = (TargetClass) enhancer.create();
+
+        // 调用代理对象的方法
+        proxy.doSomething();
+    }
+}
+```
+
+JDK的需要有接口 cglib不需要
+
+jdk创建性能高，直接根据接口创建一个代理类，cglib需要生成一个子类
+
+jdk方法调用性能差，方法调用需要反射，cglib不需要反射，直接调用代理类重写的方法，避免反射的开销
+
+
+
+
+
+**MethodInvocation** 是aop中封装方法调用 对方法的调用进行拦截和增强
+
+被代理的方法被调用时，会创建一个 `MethodInvocation` 对象
+
+
+
+维护一个adviceSupport 其中包括 代理的目标对象，和一个advisors
+
+在adviceSupport中加入advisor(一个具体的advice 封装在interceptor中 加上切点表达式)
+
+使用ProxyFactory 根据是否有接口使用cglib或者jdk的动态代理方式制造出代理对象
+
+advice就是描述一个增强方式 在MethodInterceptor中描述advice和原来method的invoke的逻辑关系
+
+aop模型中也有一个MethodInvocation 我们自己实现了一个ReflectiveMethodInvocation(区别于cglib 的methodInvocation)
+
+其中维护了每一个要增强对象的interceptor的集合 以及对其的调用逻辑 - 递归调用interceptor 维护一个计数，当技术等于拦截器列表的长度，说明拦截器执行完毕，调用原方法因为interceptor的方法参数是MethodInvocation，所以在一个interceptor中去使用methodInvocation.proceed 可以完成逻辑的递归(所有befor的执行完，执行原方法，执行所有的after)
+
+我们维护一个自动代理的实现类，DefaultAdvisorAutoProxyCreater
+
+在getBean，制造bean进入自动代理判断逻辑，首先根据类型找到所有的Advisor(在原理简易实现里面，每一个advice都会和expression 切点表达式的参数 封装成一个AspectJExpressionPointcutAdvisor) 由于有切点表达式，所以暴露了classFilter 在这里根据类匹配器，首先在代理工厂(ProxyFactory 继承自 AdviceSupport) 中维护初步的advisors
+
+在具体的jdk和cglib的invoke执行逻辑中，去获取拦截器链 在这里对原来的advisors根据具体方法 做MethodMatcher(根据method做一个缓存，之前获取到的advisors是整个类共享的，每个method需要的advisor或者说适用的不一样，做一个map缓存提高效率)
+
+然后new出ReflectiveMethodInvocation的实现类，封装具体的拦截器链对象，通过MethodInvocation和MethodIntreceptor的配合 完成具体的多拦截器的增强逻辑实现
+
+使用InstantiationAwareBeanPostProcessor中的逻辑在getBean的时候对所有的bean都会做代理的检查判断 
+
 # property-placeholder-configurer
 
 在xml中定义bean的时候可以使用${}占位符，解析配置文件中的内容

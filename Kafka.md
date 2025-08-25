@@ -1,4 +1,4 @@
-参照https://blog.csdn.net/qsmiley10/article/details/115000474?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522171516959616800222898691%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=171516959616800222898691&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-115000474-null-null.142%5Ev100%5Epc_search_result_base3&utm_term=java%20kafka&spm=1018.2226.3001.4187
+，参照https://blog.csdn.net/qsmiley10/article/details/115000474?ops_request_misc=%257B%2522request%255Fid%2522%253A%2522171516959616800222898691%2522%252C%2522scm%2522%253A%252220140713.130102334..%2522%257D&request_id=171516959616800222898691&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~sobaiduend~default-2-115000474-null-null.142%5Ev100%5Epc_search_result_base3&utm_term=java%20kafka&spm=1018.2226.3001.4187
 
 **部分参数配置省略，可以在文章中查阅**
 
@@ -1129,7 +1129,9 @@ Kafka无论是生产者发送消息还是消费者消费消息都是**批量操�
 
 ## 增加数据可靠性配置
 
-- **设置acks = al**l。acks是Producer的一个参数，代表已提交消息的定义。如果设置成all,则表明所有Broker都要接收到消息，该消息才算是”已提交”。
+- **设置acks = all**。acks是Producer的一个参数，代表已提交消息的定义。如果设置成all,则表明所有Broker都要接收到消息，该消息才算是”已提交”。
+
+- 设置min.insync.replicas > 1。Broker端参数，控制消息至少要被写入到多少个副本才算是"已提交"。设置成大于1可以提升消息持久性。在生产环境中不要使用默认值1。确保replication.factor(副本数量) > min.insync.replicas。如果两者相等，那么只要有 —个副本离线整个分区就无法正常工作了。推荐设置成replication.factor = min.insync.replicas + 1。
 
 - 设置retries为一个较大的值。同样是Producer的参数。当出现网络抖动时，消息发送可能会失败，此时配置了retries的Producer能够自动重试发送消息，尽量避免消息丢失。配置在Properties中
 
@@ -1137,8 +1139,8 @@ Kafka无论是生产者发送消息还是消费者消费消息都是**批量操�
 
 - 设置replication.factor >= 3。需要三个以上的replication。
 
-- 设置min.insync.replicas > 1。Broker端参数，控制消息至少要被写入到多少个副本才算是"已提交"。设置成大于1可以提升消息持久性。在生产环境中不要使用默认值1。确保replication.factor(副本数量) > min.insync.replicas。如果两者相等，那么只要有 —个副本离线整个分区就无法正常工作了。推荐设置成replication.factor = min.insync.replicas + 1。
-
 - **确保消息消费完成再提交**。Consumer端有个参数enable.auto.commit,最好设置成false,并自己来处理offset的提交更新。
 
   
+
+有时候为了保证生产者的发送 可以在程序中设置一发送消息 直接将消息累加器中的内容发送
